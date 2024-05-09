@@ -1,0 +1,17 @@
+{# templates/city/show.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Daylight Data for {{ cityName|capitalize }}{% endblock %}
+
+{% block body %}
+<h1>Daylight Data for {{ cityName|capitalize }}</h1>
+
+<div id="react-root" data-city-name="{{ cityName }}"></div> 
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{{ vite_entry_script_tags('/web/frontend/src/main.jsx') }} <!-- Load the React app -->
+{% endblock %}

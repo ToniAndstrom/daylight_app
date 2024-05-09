@@ -1,0 +1,16 @@
+{
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "vite": "^5.0",
+        "vite-plugin-symfony": "^6.4"
+    },
+    "dependencies": {
+        "chartjs": "^0.3.24",
+        "react-chartjs-2": "^5.2.0"
+    }
+}

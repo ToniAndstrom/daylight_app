@@ -1,0 +1,16 @@
+{# templates/city/index.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Enter a City{% endblock %}
+
+{% block body %}
+<h1>Enter a Finnish City for Daylight Data</h1>
+
+{{ form_start(form) }}
+{{ form_row(form.city, {
+'label': 'City Name',
+'attr': {'class': 'form-control', 'placeholder': 'Type the name of a Finnish city'}
+}) }}
+{{ form_end(form) }}
+{% endblock %}
