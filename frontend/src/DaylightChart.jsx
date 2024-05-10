@@ -28,10 +28,14 @@ const DaylightChart = ({ daylightChanges, cityName }) => {
   // Convert daylightChanges to the format needed by Chart.js
   const labels = Object.keys(daylightChanges);
   const data = Object.values(daylightChanges).map((duration) => {
-    const parts = duration.split(' ');
-    const hours = parseInt(parts[0]);
-    const minutes = parseInt(parts[2]);
-    return hours * 60 + minutes; // Convert to total minutes
+    // Check if duration is a string and has the expected format
+    if (typeof duration === 'string' && duration.includes(' hours ')) {
+      const parts = duration.split(' ');
+      const hours = parseInt(parts[0], 10);
+      const minutes = parseInt(parts[2], 10);
+      return hours * 60 + minutes; // Convert to total minutes
+    }
+    return 0; // Return a default value if duration is not a string
   });
 
   const chartData = {

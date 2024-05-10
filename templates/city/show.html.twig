@@ -7,6 +7,14 @@
 {% block body %}
 <h1>Daylight Data for {{ cityName|capitalize }}</h1>
 
+<p>Sunrise today: {{ sunrise }}</p>
+<p>Sunset today: {{ sunset }}</p>
+
+{# Display the time left for sunset #}
+<p>{{ time_left_for_sunset }}</p>
+{# <p>{{ daylightChanges.time_left_for_sunset }}</p> #}
+
+
 <div id="react-root" data-city-name="{{ cityName }}"></div> 
 
 {% endblock %}
