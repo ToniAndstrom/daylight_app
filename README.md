@@ -6,7 +6,7 @@ A very simple Symfony 7 daylight-app for demonstrating REACT + Symfony
 
 ## Description
 
-This project uses Symfony 7 for showing daylight time changes in different parts of the country. A form is created where user can input a name of any city and displays the change in daylight length in minutes during the year in that location.
+This project uses Symfony 7 for showing daylight time changes in different parts of the country. A form is created where user can input a name of any city and displays the change in daylight length in minutes in that location.
 
 ## Getting Started
 
