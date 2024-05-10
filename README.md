@@ -11,7 +11,7 @@ This project uses Symfony 7 for showing daylight time changes in different parts
 ## Getting Started
 
 - Simply clone the repository
-- Install dependencies by running `composer intall`
+- Install dependencies by running `composer install`
 - Install front-end dependencies by running `npm install`
 - Also install dependencies in frontend folder cd /frontend and `npm install`
 
