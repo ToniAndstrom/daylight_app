@@ -27,45 +27,34 @@ class CityControllerFinland extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $cityName = $form->get("city")->getData();
+            $cityName2 = $form->get("city2")->getData();
 
-            // Fetch latitude and longitude for the entered city name
+            // Fetch latitude and longitude for the entered city name - WORKING
             $coordinates = $this->getCoordinatesForCity($cityName);
+            $coordinates2 = $this->getCoordinatesForCity($cityName2);
 
-            if ($coordinates) {
-                // Calculate the change in daylight length in minutes
-                $daylightData = $this->calculateDaylightChanges($coordinates);
+            $daylightData = $coordinates
+                ? $this->calculateDaylightChanges($coordinates)
+                : null;
+            $daylightData2 = $coordinates2
+                ? $this->calculateDaylightChanges($coordinates2)
+                : null;
 
-                // Fetch sunrise and sunset times
-                $sunTimes = $this->getSunriseSunsetTimes($coordinates);
-
-                // Calculate the time left for sunset if current time is before sunset
-                $now = new \DateTime();
-                $sunset = new \DateTime($sunTimes["sunset"]);
-                if ($now < $sunset) {
-                    $timeLeftForSunset = $now
-                        ->diff($sunset)
-                        ->format("%h hours %i minutes left for today's sunset");
-                } else {
-                    $timeLeftForSunset = "Sunset has passed.";
-                }
-
-                // Render the results with the daylight data
-                return $this->render("city/show.html.twig", [
-                    "form" => $form->createView(),
-                    "daylightChanges" => $daylightData["daylightChanges"],
-                    "cityName" => $cityName,
-                    "sunrise" => $daylightData["sunriseLocal"],
-                    "sunset" => $daylightData["sunsetLocal"],
-                    "time_left_for_sunset" =>
-                        $daylightData["timeLeftForSunset"], // This is in UTC
-                ]);
-            } else {
-                // Handle the case where coordinates could not be found
+            if (!$daylightData || !$daylightData2) {
                 $this->addFlash(
                     "error",
                     "Could not find the coordinates for the entered city. Please try a different city."
                 );
             }
+
+            // Render the results with the daylight data
+            return $this->render("city/show.html.twig", [
+                "form" => $form->createView(),
+                "daylightChanges" => $daylightData["daylightChanges"] ?? [],
+                "daylightChanges2" => $daylightData2["daylightChanges"] ?? [],
+                "cityName" => $cityName,
+                "cityName2" => $cityName2,
+            ]);
         }
 
         return $this->render("city/index.html.twig", [
@@ -73,28 +62,38 @@ class CityControllerFinland extends AbstractController
         ]);
     }
 
-    #[Route("/api/daylight/{cityName}", name: "api_daylight")]
+    #[Route("/api/daylight/{cityName}/{cityName2}", name: "api_daylight")]
     public function daylightApi(
         Request $request,
-        string $cityName
+        string $cityName,
+        string $cityName2
     ): JsonResponse {
-        // No need to manually set $cityName, it's now obtained from the route parameter
         $coordinates = $this->getCoordinatesForCity($cityName);
+        $coordinates2 = $this->getCoordinatesForCity($cityName2);
 
-        if ($coordinates) {
+        if ($coordinates && $coordinates2) {
             $daylightChanges = $this->calculateDaylightChanges($coordinates);
+            $daylightChanges2 = $this->calculateDaylightChanges($coordinates2);
+
             return $this->json([
                 "daylightChanges" => $daylightChanges,
                 "cityName" => $cityName,
+                "daylightChanges2" => $daylightChanges2,
+                "cityName2" => $cityName2,
             ]);
         } else {
-            return $this->json(
-                [
-                    "error" =>
-                        "Could not find the coordinates for the entered city.",
-                ],
-                Response::HTTP_NOT_FOUND
-            );
+            $errorMessages = [];
+            if (!$coordinates) {
+                $errorMessages[
+                    "city1Error"
+                ] = "Could not find the coordinates for the city: {$cityName}.";
+            }
+            if (!$coordinates2) {
+                $errorMessages[
+                    "city2Error"
+                ] = "Could not find the coordinates for the city: {$cityName2}.";
+            }
+            return $this->json($errorMessages, Response::HTTP_NOT_FOUND);
         }
     }
 
@@ -128,81 +127,17 @@ class CityControllerFinland extends AbstractController
         return null;
     }
 
-    // Add a new method to fetch sunrise and sunset times
-    private function getSunriseSunsetTimes($coordinates): ?array
-    {
-        $response = $this->client->request(
-            "GET",
-            "https://api.sunrise-sunset.org/json",
-            [
-                "query" => [
-                    "lat" => $coordinates["lat"],
-                    "lng" => $coordinates["lng"],
-                    "date" => "today",
-                    "formatted" => 0, // Get the time in ISO 8601 format
-                ],
-            ]
-        );
-
-        $data = $response->toArray();
-
-        if (!empty($data["results"])) {
-            // Create DateTime objects from the API response
-            $sunriseUtc = new \DateTime(
-                $data["results"]["sunrise"],
-                new \DateTimeZone("UTC")
-            );
-            $sunsetUtc = new \DateTime(
-                $data["results"]["sunset"],
-                new \DateTimeZone("UTC")
-            );
-
-            // Set the time zone to the local time zone of Espoo, Uusimaa, Finland
-            $localTimeZone = new \DateTimeZone("Europe/Helsinki"); // Helsinki is the capital city of Finland and shares the same time zone as Espoo
-
-            // Convert the times to the local time zone
-            $sunriseUtc->setTimezone($localTimeZone);
-            $sunsetUtc->setTimezone($localTimeZone);
-
-            // Format the times to your preference
-            $sunriseLocal = $sunriseUtc->format("H:i:s");
-            $sunsetLocal = $sunsetUtc->format("H:i:s");
-
-            return [
-                "sunrise" => $sunriseLocal,
-                "sunset" => $sunsetLocal,
-            ];
-        }
-    }
-
     private function calculateDaylightChanges($coordinates): array
     {
         $daylightChanges = [];
-        $datesToCheck = [
-            "2024-01-01",
-            "2024-02-01",
-            "2024-03-01",
-            "2024-04-01",
-            "2024-05-01",
-            "2024-06-01",
-            "2024-07-01",
-            "2024-08-01",
-            "2024-09-01",
-            "2024-10-01",
-            "2024-11-01",
-            "2024-12-01",
-            date("Y-m-d"), // Add today's date to the array
-        ];
+        $startDate = new \DateTime("first day of January this year");
+        $endDate = new \DateTime("last day January this year");
 
-        $sunriseLocal = "";
-        $sunsetLocal = "";
-        $timeLeftForSunset = ""; // Initialize the variable
-
-        // $daylightChanges["time_left_for_sunset"] =
-        //     "Time left for sunset is not available.";
-
-        foreach ($datesToCheck as $date) {
-            $daylightData = $this->fetchDaylightData($coordinates, $date);
+        for ($date = $startDate; $date <= $endDate; $date->modify("+1 day")) {
+            $daylightData = $this->fetchDaylightData(
+                $coordinates,
+                $date->format("Y-m-d")
+            );
 
             if (!empty($daylightData["results"])) {
                 // Convert sunrise and sunset to local time zone
@@ -222,39 +157,14 @@ class CityControllerFinland extends AbstractController
                 $dayLength = (new \DateTime($sunsetLocal))->diff(
                     new \DateTime($sunriseLocal)
                 );
-                $daylightChanges[$date] = $dayLength->format(
+                $daylightChanges[$date->format("Y-m-d")] = $dayLength->format(
                     "%h hours %i minutes"
                 );
-
-                // Calculate the time left for sunset in UTC
-                if ($date == date("Y-m-d")) {
-                    $nowUtc = new \DateTime("now", new \DateTimeZone("UTC"));
-                    $sunsetUtc = new \DateTime(
-                        $daylightData["results"]["sunset"],
-                        new \DateTimeZone("UTC")
-                    );
-                    if ($nowUtc < $sunsetUtc) {
-                        $timeLeft = $nowUtc->diff($sunsetUtc);
-                        $timeLeftForSunset = $timeLeft->format(
-                            "%h hours %i minutes left for today's sunset"
-                        );
-                    } else {
-                    // Calculate how many minutes ago sunset occurred
-                        $timeSinceSunset = $sunsetUtc->diff($nowUtc);
-                        $minutesSinceSunset = $timeSinceSunset->days * 24 * 60;
-                        $minutesSinceSunset += $timeSinceSunset->h * 60;
-                        $minutesSinceSunset += $timeSinceSunset->i;
-                        $daylightChanges['time_left_for_sunset'] = 'Sunset has passed ' . $minutesSinceSunset . ' minutes ago.';
-                    }
-                }
             }
         }
         // Return the daylight changes along with the local sunrise and sunset times
         return [
             "daylightChanges" => $daylightChanges,
-            "sunriseLocal" => $sunriseLocal,
-            "sunsetLocal" => $sunsetLocal,
-            "timeLeftForSunset" => $timeLeftForSunset, // Ensure this key is always set
         ];
     }
 

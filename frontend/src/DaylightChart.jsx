@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Chart } from 'react-chartjs-2'; // Corrected import
+import { Chart } from 'react-chartjs-2';
 import PropTypes from 'prop-types';
 
 ChartJS.register(
@@ -24,19 +24,22 @@ ChartJS.register(
   Legend
 );
 
-const DaylightChart = ({ daylightChanges, cityName }) => {
+const DaylightChart = ({
+  daylightChanges,
+  cityName,
+  daylightChanges2,
+  cityName2,
+}) => {
   // Convert daylightChanges to the format needed by Chart.js
-  const labels = Object.keys(daylightChanges);
-  const data = Object.values(daylightChanges).map((duration) => {
-    // Check if duration is a string and has the expected format
-    if (typeof duration === 'string' && duration.includes(' hours ')) {
-      const parts = duration.split(' ');
-      const hours = parseInt(parts[0], 10);
-      const minutes = parseInt(parts[2], 10);
-      return hours * 60 + minutes; // Convert to total minutes
-    }
-    return 0; // Return a default value if duration is not a string
-  });
+  const labels = Object.keys(daylightChanges.daylightChanges);
+  const data = Object.values(daylightChanges.daylightChanges).map((duration) =>
+    convertToMinutes(duration)
+  );
+  const data2 = daylightChanges2
+    ? Object.values(daylightChanges2.daylightChanges).map((duration) =>
+        convertToMinutes(duration)
+      )
+    : [];
 
   const chartData = {
     labels,
@@ -48,15 +51,35 @@ const DaylightChart = ({ daylightChanges, cityName }) => {
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
       },
+      {
+        label: `${cityName2} Daylight Changes`,
+        data: data2,
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      },
     ],
   };
 
-  return <Chart type="line" data={chartData} />; // Corrected usage
+  return <Chart type="line" data={chartData} />;
+};
+
+// Helper function to convert duration string to total minutes
+const convertToMinutes = (duration) => {
+  if (typeof duration === 'string' && duration.includes(' hours ')) {
+    const parts = duration.split(' ');
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[2], 10);
+    return hours * 60 + minutes;
+  }
+  return 0;
 };
 
 DaylightChart.propTypes = {
   daylightChanges: PropTypes.object.isRequired,
   cityName: PropTypes.string.isRequired,
+  daylightChanges2: PropTypes.object,
+  cityName2: PropTypes.string,
 };
 
-export default DaylightChart; // Exporting DaylightChart instead of App
+export default DaylightChart;

@@ -2,24 +2,16 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Daylight Data for {{ cityName|capitalize }}{% endblock %}
+{% block title %}Daylight Data for {{ cityName|capitalize }} and {{ cityName2|capitalize }}{% endblock %}
 
 {% block body %}
-<h1>Daylight Data for {{ cityName|capitalize }}</h1>
+<h1>Daylight Data for {{ cityName|capitalize }} and {{ cityName2|capitalize }}</h1>
 
-<p>Sunrise today: {{ sunrise }}</p>
-<p>Sunset today: {{ sunset }}</p>
-
-{# Display the time left for sunset #}
-<p>{{ time_left_for_sunset }}</p>
-{# <p>{{ daylightChanges.time_left_for_sunset }}</p> #}
-
-
-<div id="react-root" data-city-name="{{ cityName }}"></div> 
+<div id="react-root" data-city-name="{{ cityName }}" data-city-name2="{{ cityName2 }}"></div> 
 
 {% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
-{{ vite_entry_script_tags('/web/frontend/src/main.jsx') }} <!-- Load the React app -->
+{{ vite_entry_script_tags('/frontend/src/main.jsx') }} <!-- Load the React app -->
 {% endblock %}

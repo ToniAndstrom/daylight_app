@@ -16,6 +16,11 @@ class CityType extends AbstractType
                 "attr" => ["class" => "form-control"],
                 "required" => true,
             ])
+            ->add("city2", TextType::class, [
+                "label" => "Enter a Finnish city",
+                "attr" => ["class" => "form-control"],
+                "required" => true,
+            ])
             ->add("submit", SubmitType::class, [
                 "label" => "Get Daylight Data",
                 "attr" => ["class" => "btn btn-primary"],
