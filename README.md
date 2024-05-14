@@ -2,14 +2,16 @@
 
 A very simple Symfony 7 daylight-app for demonstrating REACT + Symfony
 
+![alt text](https://github.com/kalwar/daylight_app/blob/main/daylight_info.png?raw=true)
+
 ## Description
 
-This project uses Symfony 7 for showing daylight time changes in different parts of the country. A form is created where user can input a name of any city and displays the change in daylight length in minutes during the year in that location.
+This project uses Symfony 7 for showing daylight time changes in different parts of the country. A form is created where user can input a name of any city and displays the change in daylight length in minutes in that location.
 
 ## Getting Started
 
 - Simply clone the repository
-- Install dependencies by running `composer intall`
+- Install dependencies by running `composer install`
 - Install front-end dependencies by running `npm install`
 - Also install dependencies in frontend folder cd /frontend and `npm install`
 
