@@ -2,7 +2,7 @@
 
 A very simple Symfony 7 daylight-app for demonstrating REACT + Symfony
 
-![alt text](https://github.com/kalwar/daylight_app/blob/main/daylight_info.png?raw=true)
+![alt text](https://github.com/kalwar/daylight_app/blob/main/daylight_info_1.png?raw=true)
 
 ## Description
 
