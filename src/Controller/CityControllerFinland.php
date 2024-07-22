@@ -84,14 +84,10 @@ class CityControllerFinland extends AbstractController
         } else {
             $errorMessages = [];
             if (!$coordinates) {
-                $errorMessages[
-                    "city1Error"
-                ] = "Could not find the coordinates for the city: {$cityName}.";
+                $errorMessages["city1Error"] = "Could not find the coordinates for the city: {$cityName}.";
             }
             if (!$coordinates2) {
-                $errorMessages[
-                    "city2Error"
-                ] = "Could not find the coordinates for the city: {$cityName2}.";
+                $errorMessages["city2Error"] = "Could not find the coordinates for the city: {$cityName2}.";
             }
             return $this->json($errorMessages, Response::HTTP_NOT_FOUND);
         }
@@ -99,7 +95,7 @@ class CityControllerFinland extends AbstractController
 
     private function getCoordinatesForCity($cityName): ?array
     {
-        $apiKey = $this->getParameter("geocode_api_key"); // Use the 'geocode_api_key' parameter
+        $apiKey = $this->getParameter($_ENV["api_key"]); // Use the 'geocode_api_key' parameter
 
         $geocodeResponse = $this->client->request(
             "GET",
